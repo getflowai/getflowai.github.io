@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowAI — Do anúncio à venda, no automático</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:    #0a0a0a;
+    --bg2:   #111111;
+    --bg3:   #181818;
+    --border: rgba(255,255,255,0.08);
+    --green:  #00e676;
+    --green-dim: #00c45e;
+    --green-glow: rgba(0,230,118,0.18);
+    --white:  #f5f5f0;
+    --white-dim: rgba(245,245,240,0.52);
+    --white-faint: rgba(245,245,240,0.14);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.55;
+  }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 52px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.88);
+    backdrop-filter: blur(18px);
+    transition: background 0.3s;
+  }
+  nav.scrolled { background: rgba(10,10,10,0.97); }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    color: var(--white); text-decoration: none;
+  }
+  .logo span { color: var(--green); }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: var(--white-dim); text-decoration: none;
+    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--green); color: #000;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 13px; letter-spacing: 0.04em;
+    padding: 10px 24px; border: none; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .nav-cta:hover { background: var(--green-dim); transform: translateY(-1px); box-shadow: 0 6px 24px var(--green-glow); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    padding: 140px 52px 80px;
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow-1 { position: absolute; top: 0; left: -10%; width: 600px; height: 600px; border-radius: 50%; background: rgba(0,230,118,0.06); filter: blur(100px); pointer-events: none; }
+  .hero-glow-2 { position: absolute; bottom: -10%; right: -5%; width: 500px; height: 500px; border-radius: 50%; background: rgba(0,230,118,0.04); filter: blur(120px); pointer-events: none; }
+  .hero-bg-word {
+    position: absolute; right: -2%; bottom: 5%;
+    font-family: 'Syne', sans-serif; font-size: clamp(160px, 22vw, 340px);
+    font-weight: 800; letter-spacing: -12px;
+    color: rgba(255,255,255,0.017);
+    pointer-events: none; user-select: none; line-height: 1;
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; gap: 80px; width: 100%;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(0,230,118,0.3);
+    background: rgba(0,230,118,0.06);
+    padding: 6px 14px; margin-bottom: 28px;
+    font-size: 11px; letter-spacing: 0.1em; color: var(--green); text-transform: uppercase;
+  }
+  .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 5.2vw, 76px);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -2.5px; margin-bottom: 24px;
+  }
+  .hero h1 em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-weight: 400;
+    color: var(--green); letter-spacing: -1px;
+  }
+  .hero-sub {
+    color: var(--white-dim); font-size: 15px;
+    line-height: 1.8; max-width: 520px; margin-bottom: 40px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .btn-primary {
+    background: var(--green); color: #000;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 0.04em;
+    padding: 15px 32px; border: none; cursor: pointer;
+    transition: all 0.25s; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--green-dim); transform: translateY(-2px); box-shadow: 0 12px 40px var(--green-glow); }
+  .btn-ghost {
+    background: transparent; color: var(--white);
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 14px; letter-spacing: 0.04em;
+    padding: 15px 32px; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.22); background: var(--white-faint); }
+  .hero-note { color: var(--white-faint); font-size: 11px; letter-spacing: 0.04em; margin-top: 16px; }
+
+  /* hero funnel visual */
+  .funnel-visual {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  .fv-step {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 24px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    transition: border-color 0.3s, background 0.3s;
+    width: 100%;
+  }
+  .fv-step:hover { border-color: rgba(0,230,118,0.3); background: var(--bg3); }
+  .fv-icon { font-size: 22px; flex-shrink: 0; }
+  .fv-info { flex: 1; }
+  .fv-label { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+  .fv-sub { color: var(--white-dim); font-size: 11px; margin-top: 2px; }
+  .fv-bar-wrap { width: 60px; height: 4px; background: var(--border); flex-shrink: 0; }
+  .fv-bar { height: 100%; background: var(--green); }
+  .fv-arrow {
+    color: var(--green); font-size: 14px;
+    padding: 6px 0; align-self: center;
+  }
+  .fv-connector { width: 1px; height: 20px; background: rgba(0,230,118,0.25); margin: 0 auto; }
+
+  /* ── STATS ── */
+  .stats-bar {
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(4, 1fr);
+  }
+  .stat-item { padding: 38px 52px; border-right: 1px solid var(--border); }
+  .stat-item:last-child { border-right: none; }
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 44px; font-weight: 800;
+    letter-spacing: -2px; line-height: 1;
+    color: var(--white);
+  }
+  .stat-number span { color: var(--green); }
+  .stat-label { color: var(--white-dim); font-size: 12px; letter-spacing: 0.06em; margin-top: 6px; text-transform: uppercase; }
+
+  /* ── SHARED SECTION STYLES ── */
+  section { padding: 100px 52px; }
+  .section-tag {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-tag::before { content: '//'; color: var(--white-faint); }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(34px, 3.8vw, 54px);
+    font-weight: 800; letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 20px;
+  }
+  h2 em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-weight: 400; color: var(--green);
+  }
+  .section-lead { color: var(--white-dim); font-size: 15px; line-height: 1.8; max-width: 540px; }
+  .alt-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  /* ── PIPELINE ── */
+  .pipeline-header { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: end; margin-bottom: 64px; }
+  .pipeline {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute; top: 40px; left: 12%; right: 12%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    opacity: 0.35; z-index: 0;
+  }
+  .pipe-step { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 20px; position: relative; z-index: 1; }
+  .pipe-icon-wrap {
+    width: 60px; height: 60px; background: var(--bg2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    margin-bottom: 20px; position: relative;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .pipe-step:hover .pipe-icon-wrap { border-color: rgba(0,230,118,0.4); background: var(--bg3); }
+  .pipe-step-num {
+    position: absolute; top: -8px; right: -8px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--green); color: #000;
+    font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pipe-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .pipe-desc { color: var(--white-dim); font-size: 12px; line-height: 1.6; }
+  .pipe-tag { display: inline-block; margin-top: 10px; padding: 3px 10px; font-size: 10px; letter-spacing: 0.06em; border: 1px solid var(--border); color: var(--white-dim); }
+
+  .pipeline-details {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 40px;
+  }
+  .pd-card { background: var(--bg); padding: 28px 24px; transition: background 0.2s; position: relative; overflow: hidden; }
+  .pd-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+  .pd-card:hover { background: var(--bg2); }
+  .pd-card:hover::before { transform: scaleX(1); }
+  .pd-card h4 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 14px; letter-spacing: 0.02em; }
+  .pd-card ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .pd-card li { color: var(--white-dim); font-size: 12px; display: flex; align-items: flex-start; gap: 8px; }
+  .pd-card li::before { content: '→'; color: var(--green); flex-shrink: 0; }
+
+  /* ── SERVICES ── */
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 56px; }
+  .service-card { background: var(--bg); padding: 40px 32px; position: relative; overflow: hidden; transition: background 0.3s; cursor: default; }
+  .service-card:hover { background: var(--bg2); }
+  .service-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .service-card:hover::after { transform: scaleX(1); }
+  .sc-icon { font-size: 34px; margin-bottom: 22px; display: block; }
+  .sc-num { position: absolute; top: 24px; right: 24px; font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; }
+  .service-card h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .service-card p { color: var(--white-dim); font-size: 13px; line-height: 1.75; margin-bottom: 20px; }
+  .sc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sc-tag { padding: 3px 10px; font-size: 10px; letter-spacing: 0.06em; border: 1px solid var(--border); color: var(--white-dim); }
+
+  /* ── RESULTS ── */
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 56px; }
+  .result-card { background: var(--bg); padding: 36px 30px; transition: background 0.2s; }
+  .result-card:hover { background: var(--bg3); }
+  .result-metric { font-family: 'Syne', sans-serif; font-size: 54px; font-weight: 800; letter-spacing: -3px; line-height: 1; margin-bottom: 8px; color: var(--green); }
+  .result-label { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .result-desc { color: var(--white-dim); font-size: 12px; line-height: 1.7; }
+  .result-segment { display: inline-block; margin-top: 14px; padding: 3px 10px; font-size: 10px; letter-spacing: 0.06em; border: 1px solid var(--border); color: var(--white-dim); }
+
+  /* ── TESTIMONIALS ── */
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 56px; }
+  .testi { background: var(--bg); padding: 36px 30px; transition: background 0.2s; }
+  .testi:hover { background: var(--bg2); }
+  .stars { color: var(--green); font-size: 12px; letter-spacing: 2px; margin-bottom: 16px; }
+  .testi-quote { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 18px; line-height: 1.6; color: var(--white); margin-bottom: 24px; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .t-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .t-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .t-role { color: var(--white-dim); font-size: 11px; margin-top: 2px; }
+
+  /* ── PROCESS ── */
+  .process-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .process-steps { display: flex; flex-direction: column; }
+  .pstep { display: grid; grid-template-columns: 48px 1fr; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .pstep:first-child { border-top: 1px solid var(--border); }
+  .pstep-num { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; color: var(--white-faint); padding-top: 3px; transition: color 0.2s; }
+  .pstep.active .pstep-num { color: var(--green); }
+  .pstep-body h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 0; }
+  .pstep-desc { color: var(--white-dim); font-size: 13px; line-height: 1.7; margin-top: 8px; display: none; }
+  .pstep.active .pstep-desc { display: block; }
+
+  .process-visual { background: var(--bg2); border: 1px solid var(--border); padding: 32px; }
+  .pv-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-dim); margin-bottom: 24px; }
+  .metric-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .metric-key { color: var(--white-dim); font-size: 12px; width: 150px; flex-shrink: 0; }
+  .metric-bar-wrap { flex: 1; height: 4px; background: var(--border); }
+  .metric-bar { height: 100%; background: var(--green); }
+  .metric-val { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--green); width: 44px; text-align: right; }
+  .seg-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .seg-tag { padding: 3px 10px; font-size: 10px; letter-spacing: 0.06em; border: 1px solid var(--border); color: var(--white-dim); }
+
+  /* ── CTA ── */
+  .cta-section {
+    border-top: 1px solid var(--border);
+    padding: 120px 52px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; bottom: -40%; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 600px;
+    background: radial-gradient(circle, rgba(0,230,118,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cta-section h2 { max-width: 640px; margin: 0 auto 20px; }
+  .cta-section .section-lead { margin: 0 auto 48px; text-align: center; }
+  .btn-whatsapp {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--green); color: #000;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 16px; letter-spacing: 0.02em;
+    padding: 20px 44px;
+    text-decoration: none;
+    transition: all 0.25s;
+    position: relative;
+    animation: wglow 3s ease-in-out infinite;
+  }
+  .btn-whatsapp:hover { background: var(--green-dim); transform: translateY(-3px); box-shadow: 0 16px 48px var(--green-glow); animation: none; }
+  @keyframes wglow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0); }
+    50% { box-shadow: 0 0 32px 8px rgba(0,230,118,0.2); }
+  }
+  .cta-note { color: var(--white-faint); font-size: 11px; letter-spacing: 0.04em; margin-top: 18px; }
+
+  /* ── FOOTER ── */
+  footer { border-top: 1px solid var(--border); padding: 36px 52px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 40px; }
+  .footer-links { display: flex; gap: 28px; list-style: none; justify-content: center; }
+  .footer-links a { color: var(--white-dim); font-size: 11px; text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy { color: var(--white-faint); font-size: 11px; letter-spacing: 0.04em; text-align: right; }
+
+  /* ── FADE UP ── */
+  .fade-up { opacity: 0; transform: translateY(26px); transition: opacity 0.65s, transform 0.65s; }
+  .fade-up.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 960px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-inner { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    section { padding: 64px 24px; }
+    .pipeline-header { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+    .pipeline::before { display: none; }
+    .pipeline-details { grid-template-columns: repeat(2, 1fr); }
+    .services-grid, .results-grid, .testi-grid { grid-template-columns: 1fr; }
+    .process-grid { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr; text-align: center; }
+    .footer-copy, .footer-links { justify-content: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="logo" href="#">Flow<span>AI</span></a>
+  <ul class="nav-links">
+    <li><a href="#pipeline">O Funil</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#processo">Processo</a></li>
+  </ul>
+  <a class="nav-cta" href="https://api.whatsapp.com/send?phone=5511988487212&text=Quero+saber+mais+sobre+o+funil+completo" target="_blank">Falar no WhatsApp →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-bg-word">FLOW</div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">Funil completo com IA</div>
+      <h1>Do anúncio<br>ao cliente,<br><em>sem parar.</em></h1>
+      <p class="hero-sub">Criamos e gerenciamos seu funil completo de aquisição: Google Ads, landing page de alta conversão e atendimento automatizado no WhatsApp com inteligência artificial. Tudo integrado, tudo no piloto automático.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="https://api.whatsapp.com/send?phone=5511988487212&text=Quero+saber+mais+sobre+o+funil+completo" target="_blank">Quero meu funil agora</a>
+        <a class="btn-ghost" href="#pipeline">Como funciona</a>
+      </div>
+      <p class="hero-note">// Sem contrato mínimo · Resultados em até 15 dias</p>
+    </div>
+    <div class="fade-up">
+      <div class="funnel-visual">
+        <div class="fv-step">
+          <div class="fv-icon">📢</div>
+          <div class="fv-info">
+            <div class="fv-label">Google Ads</div>
+            <div class="fv-sub">Campanha otimizada por IA</div>
+          </div>
+          <div class="fv-bar-wrap"><div class="fv-bar" style="width:100%"></div></div>
+        </div>
+        <div class="fv-connector"></div>
+        <div class="fv-step">
+          <div class="fv-icon">🖥️</div>
+          <div class="fv-info">
+            <div class="fv-label">Landing Page</div>
+            <div class="fv-sub">Alta conversão com A/B contínuo</div>
+          </div>
+          <div class="fv-bar-wrap"><div class="fv-bar" style="width:72%"></div></div>
+        </div>
+        <div class="fv-connector"></div>
+        <div class="fv-step">
+          <div class="fv-icon">💬</div>
+          <div class="fv-info">
+            <div class="fv-label">WhatsApp IA</div>
+            <div class="fv-sub">Qualifica e agenda em segundos</div>
+          </div>
+          <div class="fv-bar-wrap"><div class="fv-bar" style="width:50%"></div></div>
+        </div>
+        <div class="fv-connector"></div>
+        <div class="fv-step">
+          <div class="fv-icon">🤝</div>
+          <div class="fv-info">
+            <div class="fv-label">Venda Fechada</div>
+            <div class="fv-sub">Cliente convertido no automático</div>
+          </div>
+          <div class="fv-bar-wrap"><div class="fv-bar" style="width:28%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item fade-up"><div class="stat-number"><span>6.8</span>x</div><div class="stat-label">ROAS médio dos clientes</div></div>
+  <div class="stat-item fade-up"><div class="stat-number">+<span>340</span>%</div><div class="stat-label">Aumento de conversão</div></div>
+  <div class="stat-item fade-up"><div class="stat-number"><span>15</span>d</div><div class="stat-label">Para funil ativo</div></div>
+  <div class="stat-item fade-up"><div class="stat-number"><span>24</span>/7</div><div class="stat-label">IA operando</div></div>
+</div>
+
+<!-- PIPELINE -->
+<section id="pipeline" class="alt-bg">
+  <div class="pipeline-header fade-up">
+    <div>
+      <div class="section-tag">O funil completo</div>
+      <h2>Cada etapa<br>orquestrada pela <em>IA</em></h2>
+    </div>
+    <p class="section-lead">Não fazemos só tráfego. Não fazemos só chatbot. Construímos o funil inteiro — do clique no anúncio até o cliente fechado — como uma máquina única e integrada.</p>
+  </div>
+  <div class="pipeline fade-up">
+    <div class="pipe-step">
+      <div class="pipe-icon-wrap">📢<div class="pipe-step-num">1</div></div>
+      <div class="pipe-name">Google Ads</div>
+      <div class="pipe-desc">Campanhas com segmentação precisa e otimização contínua para o menor custo por lead.</div>
+      <div class="pipe-tag">Search · Display · PMax</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon-wrap">🖥️<div class="pipe-step-num">2</div></div>
+      <div class="pipe-name">Landing Page</div>
+      <div class="pipe-desc">Página de alta conversão com copy orientado a resultado e testes A/B contínuos.</div>
+      <div class="pipe-tag">CRO · A/B · Speed</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon-wrap">💬<div class="pipe-step-num">3</div></div>
+      <div class="pipe-name">WhatsApp IA</div>
+      <div class="pipe-desc">Agente de IA recebe o lead em segundos, qualifica, tira dúvidas e agenda automaticamente.</div>
+      <div class="pipe-tag">GPT-4 · Natural · 24/7</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon-wrap">📈<div class="pipe-step-num">4</div></div>
+      <div class="pipe-name">Escala</div>
+      <div class="pipe-desc">Identificamos gargalos, otimizamos o que converte e escalamos com dados reais.</div>
+      <div class="pipe-tag">Insights · Otimização</div>
+    </div>
+  </div>
+  <div class="pipeline-details fade-up">
+    <div class="pd-card">
+      <h4>Google Ads</h4>
+      <ul>
+        <li>Setup e estrutura de campanhas</li>
+        <li>Pesquisa de palavras-chave</li>
+        <li>Criação de anúncios e extensões</li>
+        <li>Otimização semanal de lances</li>
+        <li>Remarketing e públicos similares</li>
+      </ul>
+    </div>
+    <div class="pd-card">
+      <h4>Landing Page</h4>
+      <ul>
+        <li>Design e desenvolvimento completo</li>
+        <li>Copy persuasivo orientado a conversão</li>
+        <li>Carregamento ultra-rápido (&lt;2s)</li>
+        <li>Pixel e rastreamento de eventos</li>
+        <li>Testes A/B contínuos</li>
+      </ul>
+    </div>
+    <div class="pd-card">
+      <h4>WhatsApp IA</h4>
+      <ul>
+        <li>Agente treinado no seu negócio</li>
+        <li>Qualificação automática de leads</li>
+        <li>Respostas em menos de 1 segundo</li>
+        <li>Agendamento e follow-up automático</li>
+        <li>Transferência inteligente para humano</li>
+      </ul>
+    </div>
+    <div class="pd-card">
+      <h4>Escala</h4>
+      <ul>
+        <li>Relatórios semanais automatizados</li>
+        <li>Identificação de gargalos no funil</li>
+        <li>Alertas de performance por WhatsApp</li>
+        <li>Reunião mensal de estratégia</li>
+        <li>Ajustes contínuos sem custo extra</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="servicos">
+  <div class="fade-up">
+    <div class="section-tag">Serviços</div>
+    <h2>Escolha seu ponto<br>de <em>entrada</em></h2>
+    <p class="section-lead">Atendemos desde quem quer o funil completo do zero até quem já tem tráfego e precisa automatizar o atendimento. Você decide onde começar.</p>
+  </div>
+  <div class="services-grid fade-up">
+    <div class="service-card">
+      <span class="sc-icon">🚀</span>
+      <span class="sc-num">01</span>
+      <h3>Funil Completo</h3>
+      <p>Construímos e gerenciamos todo o seu funil de aquisição do zero: Google Ads, landing page de alta conversão e atendimento automatizado com IA no WhatsApp. Uma solução end-to-end.</p>
+      <div class="sc-tags">
+        <span class="sc-tag">Google Ads</span><span class="sc-tag">Landing Page</span><span class="sc-tag">WhatsApp IA</span><span class="sc-tag">Analytics</span>
+      </div>
+    </div>
+    <div class="service-card">
+      <span class="sc-icon">📢</span>
+      <span class="sc-num">02</span>
+      <h3>Tráfego + Conversão</h3>
+      <p>Para quem já tem atendimento resolvido mas precisa de mais leads qualificados. Criamos e otimizamos suas campanhas no Google e a landing page que transforma visitante em contato.</p>
+      <div class="sc-tags">
+        <span class="sc-tag">Google Ads</span><span class="sc-tag">Landing Page</span><span class="sc-tag">CRO</span><span class="sc-tag">PMax</span>
+      </div>
+    </div>
+    <div class="service-card">
+      <span class="sc-icon">🤖</span>
+      <span class="sc-num">03</span>
+      <h3>Automação WhatsApp IA</h3>
+      <p>Para quem já tem tráfego mas perde leads por demora no atendimento. Implantamos um agente de IA no WhatsApp que responde, qualifica e fecha em segundos — 24h por dia.</p>
+      <div class="sc-tags">
+        <span class="sc-tag">Agente IA</span><span class="sc-tag">Qualificação</span><span class="sc-tag">Follow-up</span><span class="sc-tag">Integração CRM</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="resultados" class="alt-bg">
+  <div class="fade-up" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end">
+    <div>
+      <div class="section-tag">Resultados</div>
+      <h2>Números que<br>falam por <em>si</em></h2>
+    </div>
+    <p class="section-lead">Clientes de diferentes segmentos. O denominador comum: funil integrado, IA no atendimento e resultado que se paga nos primeiros 30 dias.</p>
+  </div>
+  <div class="results-grid fade-up">
+    <div class="result-card">
+      <div class="result-metric">+380%</div>
+      <div class="result-label">Leads qualificados por mês</div>
+      <div class="result-desc">Clínica odontológica em SP aumentou agendamentos de 40 para 192 por mês após implementação do funil completo.</div>
+      <div class="result-segment">Saúde · Funil completo</div>
+    </div>
+    <div class="result-card">
+      <div class="result-metric">8.2x</div>
+      <div class="result-label">Retorno sobre investimento em ads</div>
+      <div class="result-desc">Escola de cursos online reduziu custo por aluno matriculado de R$ 180 para R$ 22 com funil otimizado.</div>
+      <div class="result-segment">Educação · Ads + LP</div>
+    </div>
+    <div class="result-card">
+      <div class="result-metric">94%</div>
+      <div class="result-label">Leads respondidos em menos de 1 min</div>
+      <div class="result-desc">Imobiliária aumentou conversão em 270% após substituir atendimento manual por agente IA no WhatsApp.</div>
+      <div class="result-segment">Imóveis · WhatsApp IA</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="fade-up" style="text-align:center">
+    <div class="section-tag" style="justify-content:center">Depoimentos</div>
+    <h2>Clientes que<br><em>transformaram</em> seus negócios</h2>
+  </div>
+  <div class="testi-grid fade-up">
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Antes eu gastava R$ 3 mil em ads e não sabia de onde vinha cada lead. Hoje tenho visibilidade total. Em 60 dias quintuplicamos o faturamento."</p>
+      <div class="testi-author">
+        <div class="t-avatar">🦷</div>
+        <div><div class="t-name">Dr. Rafael Souza</div><div class="t-role">Dentista · Clínica Sorriso · São Paulo</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"O agente de IA no WhatsApp qualifica o lead, manda proposta e agenda reunião. Melhor do que muitos vendedores que já tive."</p>
+      <div class="testi-author">
+        <div class="t-avatar">🏠</div>
+        <div><div class="t-name">Cláudia Martins</div><div class="t-role">Diretora Comercial · Imobiliária Prime · Curitiba</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <p class="testi-quote">"Em 15 dias o funil já rodava. Em 30, o custo por lead caiu 70%. Não consigo imaginar voltar para o jeito antigo de fazer marketing."</p>
+      <div class="testi-author">
+        <div class="t-avatar">📚</div>
+        <div><div class="t-name">Bruno Alves</div><div class="t-role">CEO · EduPro Cursos · Belo Horizonte</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="processo" class="alt-bg">
+  <div class="process-grid">
+    <div>
+      <div class="section-tag fade-up">Nosso processo</div>
+      <h2 class="fade-up">Do briefing ao<br>funil <em>rodando</em></h2>
+      <div class="process-steps fade-up">
+        <div class="pstep active">
+          <span class="pstep-num">01</span>
+          <div class="pstep-body">
+            <h3>Diagnóstico gratuito</h3>
+            <p class="pstep-desc">Analisamos seu negócio, concorrência e mercado para definir a estratégia ideal de funil para o seu segmento e orçamento.</p>
+          </div>
+        </div>
+        <div class="pstep">
+          <span class="pstep-num">02</span>
+          <div class="pstep-body">
+            <h3>Construção do funil</h3>
+            <p class="pstep-desc">Criamos as campanhas, desenvolvemos a landing page e treinamos o agente de IA com tudo sobre o seu negócio.</p>
+          </div>
+        </div>
+        <div class="pstep">
+          <span class="pstep-num">03</span>
+          <div class="pstep-body">
+            <h3>Go live em até 15 dias</h3>
+            <p class="pstep-desc">Todo o funil ativado, integrado e testado. Você já recebe os primeiros leads com atendimento automático funcionando.</p>
+          </div>
+        </div>
+        <div class="pstep">
+          <span class="pstep-num">04</span>
+          <div class="pstep-body">
+            <h3>Otimização contínua</h3>
+            <p class="pstep-desc">Monitoramos tudo semana a semana. Ajustamos campanhas, melhoramos a landing page e evoluímos a IA com novos dados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="process-visual fade-up">
+      <div class="pv-label">// Performance média · primeiros 90 dias</div>
+      <div class="metric-row"><div class="metric-key">Custo por lead</div><div class="metric-bar-wrap"><div class="metric-bar" style="width:85%"></div></div><div class="metric-val">−68%</div></div>
+      <div class="metric-row"><div class="metric-key">Taxa de conversão</div><div class="metric-bar-wrap"><div class="metric-bar" style="width:92%"></div></div><div class="metric-val">+340%</div></div>
+      <div class="metric-row"><div class="metric-key">Tempo de resposta</div><div class="metric-bar-wrap"><div class="metric-bar" style="width:96%"></div></div><div class="metric-val">−99%</div></div>
+      <div class="metric-row"><div class="metric-key">ROAS médio</div><div class="metric-bar-wrap"><div class="metric-bar" style="width:78%"></div></div><div class="metric-val">6.8x</div></div>
+      <div class="metric-row"><div class="metric-key">Leads qualificados</div><div class="metric-bar-wrap"><div class="metric-bar" style="width:88%"></div></div><div class="metric-val">+380%</div></div>
+      <div class="seg-tags">
+        <span class="seg-tag">Saúde</span><span class="seg-tag">Educação</span><span class="seg-tag">Imóveis</span>
+        <span class="seg-tag">E-commerce</span><span class="seg-tag">Serviços</span><span class="seg-tag">SaaS</span>
+        <span class="seg-tag">Varejo</span><span class="seg-tag">Finanças</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contato">
+  <div class="section-tag" style="justify-content:center" class="fade-up">Vamos começar</div>
+  <h2 class="fade-up">Pronto para<br><em>escalar</em> suas vendas?</h2>
+  <p class="section-lead fade-up">Diagnóstico gratuito, sem compromisso. Descubra quanto você está perdendo sem um funil integrado com IA.</p>
+  <a class="btn-whatsapp fade-up" href="https://api.whatsapp.com/send?phone=5511988487212&text=Quero+saber+mais+sobre+o+funil+completo" target="_blank">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Falar no WhatsApp
+  </a>
+  <p class="cta-note">// Respondemos em até 2 horas em dias úteis</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a class="logo" href="#">Flow<span>AI</span></a>
+  <ul class="footer-links">
+    <li><a href="#pipeline">O Funil</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#processo">Processo</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 FlowAI · Todos os direitos reservados</div>
+</footer>
+
+<script>
+  // Scroll observer
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 4) * 80}ms`;
+    obs.observe(el);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.hero .fade-up, .hero-badge, .hero h1, .hero-sub, .hero-actions, .hero-note').forEach(el => el.classList.add('visible'));
+  }, 150);
+
+  // Navbar on scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Process accordion
+  document.querySelectorAll('.pstep').forEach(step => {
+    step.addEventListener('click', () => {
+      document.querySelectorAll('.pstep').forEach(s => s.classList.remove('active'));
+      step.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
