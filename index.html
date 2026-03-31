@@ -45,7 +45,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content
 .nav-links a{color:var(--white-dim);text-decoration:none;font-family:'Montserrat',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.08em;transition:.25s}
 .nav-links a:hover{color:var(--white)}
 .nav-cta{background:var(--wa);color:#03150c;padding:16px 40px;border-radius:10px;font-weight:800;text-decoration:none;box-shadow:0 0 24px rgba(0,230,118,.18);transition:.25s;display:inline-flex;align-items:center;gap:12px}
-.nav-cta.whatsapp-cta{padding:18px 46px;font-size:18px;box-shadow:0 0 34px rgba(0,230,118,.32),0 12px 40px rgba(0,230,118,.18);transform:scale(1.02)}
+.nav-cta.whatsapp-cta{padding:16px 36px;font-size:16px;box-shadow:0 0 34px rgba(0,230,118,.32),0 12px 40px rgba(0,230,118,.18);transform:scale(1.02)}
 .nav-cta.whatsapp-cta:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 0 48px rgba(0,230,118,.42),0 16px 50px rgba(0,230,118,.24)}
 .wa-btn-icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 
@@ -76,9 +76,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content
 .wa-contact strong{font-size:15px;color:#fff}
 .wa-contact span{font-size:11px;color:rgba(255,255,255,.55)}
 .wa-top-actions{margin-left:auto;display:flex;gap:14px;color:rgba(255,255,255,.65);font-size:16px}
-.wa-screen{padding:20px 16px 18px;display:flex;flex-direction:column;gap:12px;min-height:480px;background:linear-gradient(180deg,rgba(255,255,255,.015),rgba(255,255,255,0)),radial-gradient(circle at center, rgba(255,255,255,.025), transparent 70%)}
+.wa-screen{padding:20px 16px 18px;display:flex;flex-direction:column;gap:12px;min-height:480px;background:linear-gradient(180deg,rgba(255,255,255,.015),rgba(255,255,255,0)),radial-gradient(circle at center, rgba(255,255,255,.025), transparent 70%);overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
+.wa-screen::-webkit-scrollbar{display:none}
+.wa-msg{max-width:82%;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.65;position:relative;border:1px solid rgba(255,255,255,.06);opacity:0;transform:translateY(14px) scale(.98);filter:blur(6px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1),filter .7s cubic-bezier(.22,1,.36,1)}
+.wa-msg.is-visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+.wa-typing{align-self:flex-start;display:flex;align-items:center;gap:6px;padding:12px 14px;border-radius:18px;border-bottom-left-radius:6px;background:#101010;border:1px solid rgba(255,255,255,.06);opacity:0;max-height:0;overflow:hidden;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease,max-height .28s ease,padding .28s ease,border-width .28s ease,margin .28s ease}
+.wa-typing.is-visible{opacity:1;max-height:60px;transform:translateY(0)}
+.wa-typing span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.72);display:block;animation:waTypingDots 1s infinite ease-in-out}
+.wa-typing span:nth-child(2){animation-delay:.15s}
+.wa-typing span:nth-child(3){animation-delay:.3s}
+@keyframes waTypingDots{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-3px);opacity:1}}
 .wa-date{align-self:center;font-size:11px;color:rgba(255,255,255,.42);padding:6px 10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);border-radius:999px;margin-bottom:4px}
-.wa-msg{max-width:82%;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.65;position:relative;border:1px solid rgba(255,255,255,.06)}
 .wa-msg-user{align-self:flex-end;background:#1a1a1a;color:#fff;border-bottom-right-radius:6px}
 .wa-msg-bot{align-self:flex-start;background:#101010;color:rgba(255,255,255,.88);border-bottom-left-radius:6px}
 .wa-cta-bubble{border-color:rgba(37,211,102,.35);box-shadow:0 0 0 1px rgba(37,211,102,.06) inset}
@@ -141,6 +149,9 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
 .testimonial-meta-item strong{font-family:'Montserrat',sans-serif;font-size:14px;color:var(--white)}
 .testimonial-meta-item span{font-family:'Montserrat',sans-serif;font-size:12px;color:var(--white-dim);margin-top:4px}
 @media(max-width:960px){
+  .nav-cta{padding:12px 22px;font-size:14px;border-radius:8px}
+  .nav-cta.whatsapp-cta{padding:12px 24px;font-size:14px;box-shadow:0 0 18px rgba(0,230,118,.18),0 8px 22px rgba(0,230,118,.12);transform:none}
+  .nav-cta.whatsapp-cta:hover{transform:translateY(-2px)}
   .testimonial-quote-wrap{min-height:220px}
   .testimonial-quote{font-size:24px}
   .testimonial-row{align-items:flex-start;gap:16px}
@@ -176,7 +187,7 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
     <li><a href="#resultados">Resultados</a></li>
     <li><a href="#contato">Contato</a></li>
   </ul>
-  <a class="nav-cta" href="#contato">Falar no WhatsApp →</a>
+  <a class="nav-cta" href="https://api.whatsapp.com/send?phone=5511988487212&text=Ol%C3%A1%2C%20quero%20entender%20como%20a%20FlowAI%20pode%20me%20ajudar" target="_blank" rel="noopener noreferrer">Falar no WhatsApp →</a>
 </nav>
 
 <section class="hero">
@@ -185,7 +196,7 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
     <h1>Do anúncio<br>ao cliente,<br><em>sem parar.</em></h1>
     <p class="hero-sub">Google Ads, landing page e WhatsApp com IA trabalhando juntos em um funil completo de aquisição, resposta e conversão — agora com uma estética mais tech, minimalista e premium.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="#contato">Quero meu funil</a>
+      <a class="btn btn-primary" href="https://api.whatsapp.com/send?phone=5511988487212&text=Ol%C3%A1%2C%20quero%20meu%20funil" target="_blank" rel="noopener noreferrer">Quero meu funil</a>
       <a class="btn btn-ghost" href="#pipeline">Como funciona</a>
     </div>
     
@@ -209,7 +220,7 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
         <div class="wa-screen">
           <div class="wa-date">Hoje, 14:32</div>
 
-          <div class="wa-msg wa-msg-user">
+          <div class="wa-msg wa-msg-user is-visible">
             Oi, queria entender como vocês funcionam.
           </div>
 
@@ -219,6 +230,12 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
 
           <div class="wa-msg wa-msg-bot">
             Assim você para de perder lead por demora e transforma mais cliques em clientes.
+          </div>
+
+          <div class="wa-typing" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
 
           <div class="wa-msg wa-msg-user">
@@ -242,7 +259,7 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
 
       <div class="wa-floating-card wa-floating-card-1">
         <div class="mini-label">tempo de resposta</div>
-        <div class="mini-value">&lt; 1s</div>
+        <div class="mini-value">&lt; 1m</div>
       </div>
 
       <div class="wa-floating-card wa-floating-card-2">
@@ -422,6 +439,65 @@ blockquote{font-size:22px;line-height:1.6;color:var(--white);margin-bottom:16px}
 </section>
 
 <script>
+function initWhatsAppSequence() {
+  const screen = document.querySelector('.wa-screen');
+  const messages = Array.from(document.querySelectorAll('.wa-screen .wa-msg'));
+  const typing = document.querySelector('.wa-typing');
+
+  if (!screen || !messages.length) return;
+
+  messages.forEach((message, index) => {
+    if (index === 0) {
+      message.classList.add('is-visible');
+    } else {
+      message.classList.remove('is-visible');
+    }
+  });
+
+  if (typing) typing.classList.remove('is-visible');
+
+  const scrollToBottom = () => {
+    screen.scrollTo({ top: screen.scrollHeight, behavior: 'smooth' });
+  };
+
+  const showMessage = (index) => {
+    if (messages[index]) {
+      messages[index].classList.add('is-visible');
+      setTimeout(scrollToBottom, 120);
+    }
+  };
+
+  requestAnimationFrame(() => {
+    scrollToBottom();
+
+    setTimeout(() => showMessage(1), 1200);
+    setTimeout(() => showMessage(2), 2500);
+
+    setTimeout(() => {
+      if (typing) {
+        typing.classList.add('is-visible');
+        scrollToBottom();
+      }
+    }, 3800);
+
+    setTimeout(() => {
+      if (typing) typing.classList.remove('is-visible');
+    }, 5600);
+
+    setTimeout(() => showMessage(3), 6100);
+    setTimeout(() => showMessage(4), 7600);
+    setTimeout(() => showMessage(5), 9200);
+    setTimeout(scrollToBottom, 9500);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initWhatsAppSequence);
+} else {
+  initWhatsAppSequence();
+}
+
+
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
