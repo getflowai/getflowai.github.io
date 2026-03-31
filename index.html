@@ -253,6 +253,139 @@
   .sc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .sc-tag { padding: 4px 12px; font-size: 12px; letter-spacing: 0.06em; border: 1px solid var(--border); color: var(--white-dim); }
 
+
+  /* ── SERVICES FEATURE GRID ── */
+  .services-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 56px;
+  }
+  .sf-card {
+    background: linear-gradient(180deg, var(--bg2), var(--bg));
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    min-height: 260px;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+  }
+  .sf-card:hover {
+    background: linear-gradient(180deg, var(--bg3), var(--bg2));
+    transform: translateY(-2px);
+  }
+  .sf-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.25s;
+  }
+  .sf-card:hover::after { border-color: rgba(0,230,118,0.22); }
+  .sf-card-lg { grid-column: span 2; }
+  .sf-card-sm { grid-column: span 2; }
+  .sf-card-wide { grid-column: span 3; min-height: 280px; }
+  .sf-icon-badge {
+    width: 54px; height: 54px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.02);
+    font-size: 22px;
+    margin-bottom: 22px;
+  }
+  .sf-topline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--white-dim);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .sf-big-number {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(56px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -3px;
+    color: var(--white);
+    opacity: 0.98;
+  }
+  .sf-big-number span { color: var(--green); }
+  .sf-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    line-height: 1.05;
+    letter-spacing: -0.6px;
+    margin-bottom: 12px;
+  }
+  .sf-text {
+    color: var(--white-dim);
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 95%;
+  }
+  .sf-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .sf-tag {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--white-dim);
+    letter-spacing: 0.05em;
+  }
+  .sf-mini-chart {
+    height: 120px;
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0));
+  }
+  .sf-mini-chart svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .sf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .sf-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--white-dim);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .sf-list-item::before {
+    content: '•';
+    color: var(--green);
+    font-size: 18px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  @media (max-width: 960px) {
+    .services-feature-grid { grid-template-columns: 1fr; }
+    .sf-card-lg, .sf-card-sm, .sf-card-wide { grid-column: span 1; min-height: unset; }
+    .sf-big-number { font-size: 56px; }
+    .sf-title { font-size: 22px; }
+    .sf-text, .sf-list-item { font-size: 16px; }
+  }
+
+
   /* ── RESULTS ── */
   .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 56px; }
   .result-card { background: var(--bg); padding: 36px 30px; transition: background 0.2s; }
@@ -581,8 +714,8 @@
     <div class="pipe-step">
       <div class="pipe-icon-wrap">📈<div class="pipe-step-num">4</div></div>
       <div class="pipe-name">Escala</div>
-      <div class="pipe-desc">Identificamos gargalos, otimizamos o que converte e escalamos com dados reais.</div>
-      <div class="pipe-tag">Insights · Otimização</div>
+      <div class="pipe-desc">Identificamos gargalos, ajustamos o que converte e orientamos os próximos passos com base em dados reais.</div>
+      <div class="pipe-tag">Dados · Otimização</div>
     </div>
   </div>
   <div class="pipeline-details fade-up">
@@ -617,13 +750,13 @@
       </ul>
     </div>
     <div class="pd-card">
-      <h4>Escala</h4>
+      <h4>Otimização</h4>
       <ul>
-        <li>Relatórios semanais automatizados</li>
         <li>Identificação de gargalos no funil</li>
-        <li>Alertas de performance por WhatsApp</li>
-        <li>Reunião mensal de estratégia</li>
-        <li>Ajustes contínuos sem custo extra</li>
+        <li>Leitura dos dados de campanha e conversão</li>
+        <li>Priorização do que mais impacta resultado</li>
+        <li>Recomendações práticas com base em performance real</li>
+        <li>Evolução do funil conforme a necessidade da operação</li>
       </ul>
     </div>
   </div>
@@ -634,34 +767,64 @@
   <div class="fade-up">
     <div class="section-tag">Serviços</div>
     <h2>Escolha seu ponto<br>de <em>entrada</em></h2>
-    <p class="section-lead">Atendemos desde quem quer o funil completo do zero até quem já tem tráfego e precisa automatizar o atendimento. Você decide onde começar.</p>
+    <p class="section-lead">Peguei a lógica visual do componente “Features 8” e adaptei para a identidade da FlowAI: mais modular, mais premium e com foco em oferta clara. Aqui o visitante entende rápido o que você entrega e por onde pode começar. fileciteturn2file0 fileciteturn2file8</p>
   </div>
-  <div class="services-grid fade-up">
-    <div class="service-card">
-      <span class="sc-icon">🚀</span>
-      <span class="sc-num">01</span>
-      <h3>Funil Completo</h3>
-      <p>Construímos e gerenciamos todo o seu funil de aquisição do zero: Google Ads, landing page de alta conversão e atendimento automatizado com IA no WhatsApp. Uma solução end-to-end.</p>
-      <div class="sc-tags">
-        <span class="sc-tag">Google Ads</span><span class="sc-tag">Landing Page</span><span class="sc-tag">WhatsApp IA</span><span class="sc-tag">Analytics</span>
+
+  <div class="services-feature-grid fade-up">
+    <div class="sf-card sf-card-lg">
+      <div class="sf-topline">Oferta principal</div>
+      <div class="sf-big-number"><span>360°</span></div>
+      <h3 class="sf-title">Funil completo</h3>
+      <p class="sf-text">Google Ads, landing page e WhatsApp com IA trabalhando juntos como uma única máquina de aquisição e conversão.</p>
+      <div class="sf-tags">
+        <span class="sf-tag">Google Ads</span>
+        <span class="sf-tag">Landing Page</span>
+        <span class="sf-tag">WhatsApp IA</span>
       </div>
     </div>
-    <div class="service-card">
-      <span class="sc-icon">📢</span>
-      <span class="sc-num">02</span>
-      <h3>Tráfego + Conversão</h3>
-      <p>Para quem já tem atendimento resolvido mas precisa de mais leads qualificados. Criamos e otimizamos suas campanhas no Google e a landing page que transforma visitante em contato.</p>
-      <div class="sc-tags">
-        <span class="sc-tag">Google Ads</span><span class="sc-tag">Landing Page</span><span class="sc-tag">CRO</span><span class="sc-tag">PMax</span>
+
+    <div class="sf-card sf-card-sm">
+      <div class="sf-icon-badge">📢</div>
+      <h3 class="sf-title">Tráfego + Conversão</h3>
+      <p class="sf-text">Para quem quer gerar mais leads com campanha bem estruturada e uma landing page focada em conversão.</p>
+      <div class="sf-tags">
+        <span class="sf-tag">Search</span>
+        <span class="sf-tag">Display</span>
+        <span class="sf-tag">PMax</span>
       </div>
     </div>
-    <div class="service-card">
-      <span class="sc-icon">🤖</span>
-      <span class="sc-num">03</span>
-      <h3>Automação WhatsApp IA</h3>
-      <p>Para quem já tem tráfego mas perde leads por demora no atendimento. Implantamos um agente de IA no WhatsApp que responde, qualifica e fecha em segundos — 24h por dia.</p>
-      <div class="sc-tags">
-        <span class="sc-tag">Agente IA</span><span class="sc-tag">Qualificação</span><span class="sc-tag">Follow-up</span><span class="sc-tag">Integração CRM</span>
+
+    <div class="sf-card sf-card-sm">
+      <div class="sf-icon-badge">🤖</div>
+      <h3 class="sf-title">WhatsApp IA</h3>
+      <p class="sf-text">Atendimento automático, qualificação de leads, follow-up e encaminhamento inteligente quando necessário.</p>
+      <div class="sf-tags">
+        <span class="sf-tag">Qualificação</span>
+        <span class="sf-tag">Follow-up</span>
+        <span class="sf-tag">24/7</span>
+      </div>
+    </div>
+
+    <div class="sf-card sf-card-wide">
+      <div class="sf-icon-badge">📈</div>
+      <h3 class="sf-title">Otimização orientada por dados</h3>
+      <p class="sf-text">Depois do funil rodando, a gente identifica gargalos, lê os dados de campanha e conversão e prioriza o que realmente aumenta resultado.</p>
+      <div class="sf-mini-chart">
+        <svg viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M0 119.5H400" stroke="rgba(255,255,255,0.08)"/>
+          <path d="M12 96C39 88 54 92 76 72C98 52 119 60 142 54C171 46 180 28 210 24C236 20 256 34 282 30C305 26 321 14 344 11C362 9 377 14 392 8" stroke="rgba(0,230,118,0.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 96C39 88 54 92 76 72C98 52 119 60 142 54C171 46 180 28 210 24C236 20 256 34 282 30C305 26 321 14 344 11C362 9 377 14 392 8V120H12V96Z" fill="rgba(0,230,118,0.08)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="sf-card sf-card-wide">
+      <div class="sf-icon-badge">⚙️</div>
+      <h3 class="sf-title">Como você pode começar</h3>
+      <div class="sf-list">
+        <div class="sf-list-item">Começar com o funil completo e acelerar toda a operação comercial.</div>
+        <div class="sf-list-item">Entrar primeiro com tráfego + landing page para aumentar volume de leads.</div>
+        <div class="sf-list-item">Implantar só o WhatsApp IA para parar de perder lead por demora no atendimento.</div>
       </div>
     </div>
   </div>
